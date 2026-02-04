@@ -7,6 +7,7 @@ a different Python module which doesn't have the new LOG_HANDLER functionality
 import udi_interface
 
 from nodes import GoveeDevice
+import GoveeDiscovery
 
 LOGGER = udi_interface.LOGGER
 LOG_HANDLER = udi_interface.LOG_HANDLER
@@ -34,6 +35,8 @@ class Controller(udi_interface.Node):
         self.poly.subscribe(self.poly.CUSTOMTYPEDDATA, self.typedDataHandler)
         self.poly.subscribe(self.poly.POLL, self.poll)
 
+        self.discovery = None
+
         self.poly.ready()
 
         self.poly.addNode(self)
@@ -46,7 +49,23 @@ class Controller(udi_interface.Node):
 
         self.heartbeat(0)
 
-        self.discover()
+        self.scanForDevices()
+
+
+    def scanForDevices(self, command=None):
+        """Discover Govee devices on the network"""
+        if self.discovery:
+            self.discovery.stopDiscovery()
+            
+        self.discovery = GoveeDiscovery()
+        self.discovery.startDiscovery(callback=self.processDiscoveredDevice)
+
+
+    def processDiscoveredDevice(self, response, address):
+        """Callback to handle discovered devices"""
+        print(f"Found device at {address[0]}: {response}")
+        # Add your logic to process discovered devices
+        # For example, add them to ISY or update node states
 
 
     def parameterHandler(self, params):

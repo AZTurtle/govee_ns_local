@@ -8,7 +8,7 @@ LOGGER = udi_interface.LOGGER
 
 class GoveeDevice(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name):
-        super(TemplateNode, self).__init__(polyglot, primary, address, name)
+        super(GoveeDevice, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
         self.lpfx = '%s:%s' % (address,name)
 
