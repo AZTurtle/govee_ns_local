@@ -38,6 +38,7 @@ class Controller(udi_interface.Node):
 
         self.poly.addNode(self)
 
+
     def start(self):
         self.poly.updateProfile()
 
@@ -47,23 +48,28 @@ class Controller(udi_interface.Node):
 
         self.discover()
 
+
     def parameterHandler(self, params):
         self.Parameters.load(params)
         LOGGER.debug('Loading parameters now')
         self.check_params()
+
 
     def typedParameterHandler(self, params):
         self.TypedParameters.load(params)
         LOGGER.debug('Loading typed parameters now')
         LOGGER.debug(params)
 
+
     def typedDataHandler(self, params):
         self.TypedData.load(params)
         LOGGER.debug('Loading typed data now')
         LOGGER.debug(params)
 
+
     def handleLevelChange(self, level):
         LOGGER.info('New log level: {}'.format(level))
+
 
     def poll(self, flag):
         if 'longPoll' in flag:
@@ -72,20 +78,25 @@ class Controller(udi_interface.Node):
         else:
             LOGGER.debug('shortPoll (controller)')
 
+
     # TODO: On query, request device updates
     def query(self,command=None):
         nodes = self.poly.getNodes()
         for node in nodes:
             nodes[node].reportDrivers()
 
+
     def discover(self, *args, **kwargs):
         self.poly.addNode(GoveeDevice(self.poly, self.address, 'templateaddr', 'Template Node Name'))
+
 
     def delete(self):
         LOGGER.info('Oh God I\'m being deleted. Nooooooooooooooooooooooooooooooooooooooooo.')
 
+
     def stop(self):
         LOGGER.debug('NodeServer stopped.')
+
 
     def heartbeat(self,init=False):
         LOGGER.debug('heartbeat: init={}'.format(init))
