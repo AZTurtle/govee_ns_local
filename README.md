@@ -1,0 +1,1 @@
+This node server allows your EISY to control govee lights on your LAN.

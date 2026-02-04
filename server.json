@@ -1,0 +1,33 @@
+{
+	"name": "GoveeNSLocal",
+	"docs": "https://github.com/AZTurtle/govee_ns_local",
+	"type": "python3",
+	"executable": "init.py",
+	"install": "install.sh",
+	"description": "Python Node Server for controlling Govee devices over the LAN",
+	"notice": "This Node Server is not affiliated with Govee.",
+	"shortPoll": "120",
+	"longPoll": "240",
+	"testMode": false,
+	"logLevel": "DEBUG",
+	"profile_version": "0.1.0",
+	"credits": [
+		{
+			"title": "Local Govee Node Server",
+			"author": "James Bennett",
+			"version": "0.1.0",
+			"date": "February 4, 2026",
+			"source": "https://github.com/AZTurtle/govee_ns_local",
+			"license": "https://github.com/AZTurtle/govee_ns_local/blob/main/LICENSE"
+		}
+	],
+	"store": {
+		"developer": "jamesbennett@azturtle.com",
+		"purchaseOptions": [
+			{
+				"isPerpetual": true,
+				"price": 0
+			}
+		]
+	}
+}
