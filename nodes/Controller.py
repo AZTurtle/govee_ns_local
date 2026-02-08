@@ -103,6 +103,7 @@ class Controller(udi_interface.Node):
             self.heartbeat()
         else:
             LOGGER.debug('shortPoll (controller)')
+            self.scanForDevices()
 
 
     # TODO: On query, request device updates
