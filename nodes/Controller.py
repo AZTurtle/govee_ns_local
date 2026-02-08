@@ -57,12 +57,12 @@ class Controller(udi_interface.Node):
 
     def processDiscoveredDevice(self, response, address):
         """Callback to handle discovered devices"""
-        print(f"Found device at {address[0]}: {response}")
+        LOGGER.debug(f"Found device at {address[0]}: {response}")
         
         msg = response.get('msg', {})
         data = msg.get('data', {})
 
-        print(f"Processing device data: {data}")
+        LOGGER.debug(f"Processing device data: {data}")
 
 
     def parameterHandler(self, params):

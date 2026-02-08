@@ -1,7 +1,11 @@
+import udi_interface
+
 import socket
 import struct
 import json
 import threading
+
+LOGGER = udi_interface.LOGGER
 
 class GoveeDiscovery:
     def __init__(self, multicastGroup='239.255.255.250', requestPort=4001, receivePort=4002):
@@ -43,16 +47,16 @@ class GoveeDiscovery:
         
         message = json.dumps(discovery_msg).encode('utf-8')
         self.requestSock.sendto(message, (self.multicastGroup, self.requestPort))
-        print(f"Sent discovery request to {self.multicastGroup}:{self.requestPort}")
+        LOGGER.debug(f"Sent discovery request to {self.multicastGroup}:{self.requestPort}")
         
     def listenForResponses(self, callback=None):
         """Listen for responses from devices on receive port"""
-        print(f"Listening for responses on port {self.receivePort}...")
+        LOGGER.debug(f"Listening for responses on port {self.receivePort}...")
         while self.running:
             try:
                 data, address = self.receiveSock.recvfrom(1024)
                 response = json.loads(data.decode('utf-8'))
-                print(f"Received response from {address}: {response}")
+                LOGGER.debug(f"Received response from {address}: {response}")
 
                 if callback:
                     callback(response, address)
@@ -60,9 +64,9 @@ class GoveeDiscovery:
             except socket.timeout:
                 continue
             except json.JSONDecodeError as e:
-                print(f"Error decoding JSON from {address}: {e}")
+                LOGGER.debug(f"Error decoding JSON from {address}: {e}")
             except Exception as e:
-                print(f"Error receiving data: {e}")
+                LOGGER.debug(f"Error receiving data: {e}")
                 
     def startDiscovery(self, callback=None):
         """Start discovery process"""
