@@ -1,7 +1,7 @@
 import udi_interface
 
 from nodes import GoveeDevice
-from nodes import GoveeDiscovery
+from .GoveeDiscovery import GoveeDiscovery
 
 LOGGER = udi_interface.LOGGER
 LOG_HANDLER = udi_interface.LOG_HANDLER
@@ -68,7 +68,6 @@ class Controller(udi_interface.Node):
     def parameterHandler(self, params):
         self.Parameters.load(params)
         LOGGER.debug('Loading parameters now')
-        self.check_params()
 
 
     def typedParameterHandler(self, params):
