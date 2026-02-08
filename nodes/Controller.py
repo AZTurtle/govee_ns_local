@@ -1,6 +1,6 @@
 import udi_interface
 
-from nodes import GoveeDevice
+from .GoveeDevice import GoveeDevice
 from .GoveeDiscovery import GoveeDiscovery
 
 LOGGER = udi_interface.LOGGER
