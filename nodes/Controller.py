@@ -1,9 +1,3 @@
-
-
-"""
-Get the polyinterface objects we need. 
-a different Python module which doesn't have the new LOG_HANDLER functionality
-"""
 import udi_interface
 
 from nodes import GoveeDevice
@@ -64,8 +58,11 @@ class Controller(udi_interface.Node):
     def processDiscoveredDevice(self, response, address):
         """Callback to handle discovered devices"""
         print(f"Found device at {address[0]}: {response}")
-        # Add your logic to process discovered devices
-        # For example, add them to ISY or update node states
+        
+        msg = response.get('msg', {})
+        data = msg.get('data', {})
+
+        print(f"Processing device data: {data}")
 
 
     def parameterHandler(self, params):
