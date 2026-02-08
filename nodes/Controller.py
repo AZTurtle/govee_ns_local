@@ -55,7 +55,7 @@ class Controller(udi_interface.Node):
         self.discovery.startDiscovery(callback=self.processDiscoveredDevice)
 
 
-    def processDiscoveredDevice(self, response, address):
+    def processDiscoveredDevice(self, response, address):   
         """Callback to handle discovered devices"""
         LOGGER.debug(f"Found device at {address[0]}: {response}")
         
@@ -63,6 +63,17 @@ class Controller(udi_interface.Node):
         data = msg.get('data', {})
 
         LOGGER.debug(f"Processing device data: {data}")
+
+        device = GoveeDevice(
+            self.poly, 
+            self.address, 
+            f"child_{data.get('device', 'unknown')}",
+            data.get('device', 'unknown'),
+            data.get('device', 'unknown'),
+            data.get('ip', 'unknown'),
+            data.get('sku', 'unknown'),
+        )
+        self.poly.addNode(device)
 
 
     def parameterHandler(self, params):
