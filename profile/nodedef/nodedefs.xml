@@ -1,0 +1,27 @@
+<nodeDefs>
+    <nodeDef id="govee_controller" nls="CTL">
+        <sts>
+            <st id="ST" editor="bool" />
+        </sts>
+        <cmds>
+            <sends />
+            <accepts>
+                <cmd id="QUERY" />
+                <cmd id="DISCOVER" />
+            </accepts>
+        </cmds>
+    </nodeDef>
+    
+    <nodeDef id="govee_device" nls="DEV">
+        <sts>
+            <st id="ST" editor="bool" />
+        </sts>
+        <cmds>
+            <sends />
+            <accepts>
+                <cmd id="DON" />
+                <cmd id="DOF" />
+            </accepts>
+        </cmds>
+    </nodeDef>
+</nodeDefs>

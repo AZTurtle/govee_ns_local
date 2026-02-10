@@ -65,7 +65,7 @@ class Controller(udi_interface.Node):
 
         device_mac = data.get('device', 'unknown').replace(':', '').lower()
         child_address = device_mac[:14]
-        
+
         if self.poly.getNode(child_address):
             LOGGER.info(f"Device {child_address} already exists, skipping")
             return
@@ -158,7 +158,7 @@ class Controller(udi_interface.Node):
 
     The id must match the nodeDef id="controller" in the nodedefs.xml
     """
-    id = 'controller'
+    id = 'govee_controller'
     commands = {
         'QUERY': query,
         'DISCOVER': discover,
