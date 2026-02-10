@@ -14,7 +14,6 @@ class Controller(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name):
         super(Controller, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
-        self.name = 'Template Controller'  # override what was passed in
         self.hb = 0
 
         self.Parameters = Custom(polyglot, 'customparams')
@@ -73,7 +72,7 @@ class Controller(udi_interface.Node):
             data.get('ip', 'unknown'),
             data.get('sku', 'unknown'),
         )
-        self.poly.addNode(device)
+        self.addNode(device)
 
 
     def parameterHandler(self, params):
