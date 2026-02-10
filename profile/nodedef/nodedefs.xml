@@ -1,5 +1,6 @@
 <nodeDefs>
-    <nodeDef id="controller" nls="CTL">
+    <!-- Controller Node Definition -->
+    <nodeDef id="controller" nls="ctl">
         <sts>
             <st id="ST" editor="bool" />
         </sts>
@@ -12,15 +13,26 @@
         </cmds>
     </nodeDef>
     
-    <nodeDef id="govee_device" nls="DEV">
+    <!-- Govee Device Node Definition -->
+    <nodeDef id="govee_device" nls="dev">
         <sts>
             <st id="ST" editor="bool" />
+            <st id="GV0" editor="BRI" />
+            <st id="GV1" editor="CLITEMP" />
+            <st id="GV2" editor="bool" />
         </sts>
         <cmds>
             <sends />
             <accepts>
                 <cmd id="DON" />
                 <cmd id="DOF" />
+                <cmd id="QUERY" />
+                <cmd id="SET_BRI">
+                    <p id="BRI" editor="BRI" init="GV0" />
+                </cmd>
+                <cmd id="SET_CLITEMP">
+                    <p id="CLITEMP" editor="CLITEMP" init="GV1" />
+                </cmd>
             </accepts>
         </cmds>
     </nodeDef>

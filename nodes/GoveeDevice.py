@@ -16,7 +16,6 @@ class GoveeDevice(udi_interface.Node):
         self.sku = sku
 
         self.poly.subscribe(self.poly.START, self.start, address)
-        self.poly.subscribe(self.poly.POLL, self.poll)
 
     def start(self):
         LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
@@ -30,53 +29,51 @@ class GoveeDevice(udi_interface.Node):
         LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
         self.http = urllib3.PoolManager()
 
-    def poll(self, polltype):
-        if 'longPoll' in polltype:
-            LOGGER.debug('longPoll (node)')
-        else:
-            LOGGER.debug('shortPoll (node)')
-            if int(self.getDriver('ST')) == 1:
-                self.setDriver('ST',0)
-            else:
-                self.setDriver('ST',1)
-            LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-
-    def cmd_on(self, command):
+    def setOn(self, command=None):
+        """Turn device on"""
+        LOGGER.info(f'DON received for {self.address}')
+        # Send command to Govee device here
         self.setDriver('ST', 1)
-
-    def cmd_off(self, command):
+        
+    def setOff(self, command=None):
+        """Turn device off"""
+        LOGGER.info(f'DOF received for {self.address}')
+        # Send command to Govee device here
         self.setDriver('ST', 0)
-
-    def cmd_ping(self,command):
-        LOGGER.debug("cmd_ping:")
-        r = self.http.request('GET',"google.com")
-        LOGGER.debug("cmd_ping: r={}".format(r))
-
-
-    def query(self,command=None):
+        
+    def setBrightness(self, command):
+        """Set brightness level"""
+        value = int(command.get('value'))
+        LOGGER.info(f'SET_BRI to {value} for {self.address}')
+        # Send brightness command to Govee device here
+        self.setDriver('GV0', value)
+        
+    def setColorTemp(self, command):
+        """Set color temperature"""
+        value = int(command.get('value'))
+        LOGGER.info(f'SET_CLITEMP to {value}K for {self.address}')
+        # Send color temp command to Govee device here
+        self.setDriver('GV1', value)
+    
+    def query(self, command=None):
+        """Query device for current status"""
+        LOGGER.info(f'Query received for {self.address}')
+        # Poll device for current status here
         self.reportDrivers()
-
-    """
-    Optional.
-    This is an array of dictionary items containing the variable names(drivers)
-    values and uoms(units of measure) from ISY. This is how ISY knows what kind
-    of variable to display. Check the UOM's in the WSDK for a complete list.
-    UOM 2 is boolean so the ISY will display 'True/False'
-    """
-    drivers = [{'driver': 'ST', 'value': 0, 'uom': 2}]
-
-    """
-    id of the node from the nodedefs.xml that is in the profile.zip. This tells
-    the ISY what fields and commands this node has.
-    """
+    
     id = 'govee_device'
-
-    """
-    This is a dictionary of commands. If ISY sends a command to the NodeServer,
-    this tells it which method to call. DON calls setOn, etc.
-    """
+    
     commands = {
-                    'DON': cmd_on,
-                    'DOF': cmd_off,
-                    'PING': cmd_ping
-                }
+        'DON': setOn,
+        'DOF': setOff,
+        'SET_BRI': setBrightness,
+        'SET_CLITEMP': setColorTemp,
+        'QUERY': query,
+    }
+    
+    drivers = [
+        {'driver': 'ST', 'value': 0, 'uom': 2},      # Status (on/off)
+        {'driver': 'GV0', 'value': 0, 'uom': 51},    # Brightness (0-100%)
+        {'driver': 'GV1', 'value': 2700, 'uom': 26}, # Color Temperature (Kelvin)
+        {'driver': 'GV2', 'value': 0, 'uom': 2},     # Active status
+    ]

@@ -1,0 +1,34 @@
+# Node Definitions
+ND-govee_controller-NAME = Govee Controller
+ND-govee_controller-ICON = GenericCtl
+ND-govee_device-NAME = Govee Device
+ND-govee_device-ICON = GenericRspCtl
+
+# Controller Status
+ST-ctl-ST-NAME = NodeServer Online
+ST-ctl-GV1-NAME = Connected
+
+# Device Status
+ST-dev-ST-NAME = Status
+ST-dev-GV0-NAME = Brightness
+ST-dev-GV1-NAME = Color Temperature
+ST-dev-GV2-NAME = Active
+
+# Commands - Controller
+CMD-ctl-QUERY-NAME = Query
+CMD-ctl-DISCOVER-NAME = Discover Devices
+
+# Commands - Device
+CMD-dev-DON-NAME = On
+CMD-dev-DOF-NAME = Off
+CMD-dev-QUERY-NAME = Query
+CMD-dev-SET_BRI-NAME = Set Brightness
+CMD-dev-SET_CLITEMP-NAME = Set Color Temperature
+
+# Boolean Values
+IX_BOOL-0 = Off
+IX_BOOL-1 = On
+
+# Command Parameters
+BRI-NAME = Brightness
+CLITEMP-NAME = Color Temperature
