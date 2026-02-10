@@ -63,11 +63,20 @@ class Controller(udi_interface.Node):
 
         LOGGER.debug(f"Processing device data: {data}")
 
+        device_mac = data.get('device', 'unknown').replace(':', '').lower()
+        child_address = device_mac[:14]
+        
+        if self.poly.getNode(child_address):
+            LOGGER.info(f"Device {child_address} already exists, skipping")
+            return
+
+        LOGGER.info(f"Adding device with address: {child_address}, primary: {self.address}")
+
         device = GoveeDevice(
             self.poly, 
-            self.address, 
-            data.get('ip', 'unknown'),
-            data.get('device', 'unknown'),
+            self.address,  # primary (controller address)
+            child_address,  # valid child address (MAC without colons)
+            data.get('device', 'unknown'),  # name
             data.get('device', 'unknown'),
             data.get('ip', 'unknown'),
             data.get('sku', 'unknown'),
