@@ -66,13 +66,13 @@ class Controller(udi_interface.Node):
         device = GoveeDevice(
             self.poly, 
             self.address, 
-            f"child_{data.get('device', 'unknown')}",
+            f"goveedevice_{data.get('device', 'unknown')}",
             data.get('device', 'unknown'),
             data.get('device', 'unknown'),
             data.get('ip', 'unknown'),
             data.get('sku', 'unknown'),
         )
-        self.addNode(device)
+        self.poly.addNode(device)
 
 
     def parameterHandler(self, params):
