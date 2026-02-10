@@ -1,5 +1,5 @@
 <nodeDefs>
-    <nodeDef id="govee_controller" nls="CTL">
+    <nodeDef id="controller" nls="CTL">
         <sts>
             <st id="ST" editor="bool" />
         </sts>

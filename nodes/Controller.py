@@ -158,7 +158,7 @@ class Controller(udi_interface.Node):
 
     The id must match the nodeDef id="controller" in the nodedefs.xml
     """
-    id = 'govee_controller'
+    id = 'controller'
     commands = {
         'QUERY': query,
         'DISCOVER': discover,
