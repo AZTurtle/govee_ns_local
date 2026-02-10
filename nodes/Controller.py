@@ -30,9 +30,9 @@ class Controller(udi_interface.Node):
 
         self.discovery = None
 
-        self.poly.ready()
-
         self.poly.addNode(self)
+
+        self.poly.ready()
 
 
     def start(self):
