@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
         polyglot.start()
 
-        control = Controller(polyglot, 'controller', 'controller', 'Govee WLAN Controller')
+        control = Controller(polyglot, 'govee_controller', 'govee_controller', 'Govee WLAN Controller')
 
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
