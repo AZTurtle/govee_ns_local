@@ -6,12 +6,12 @@ import urllib3
 LOGGER = udi_interface.LOGGER
 
 class GoveeDevice(udi_interface.Node):
-    def __init__(self, polyglot, primary, address, name, macAddress, ipAddress, sku, send_fn=None):
+    def __init__(self, polyglot, primary, address, name, deviceId, ipAddress, sku, send_fn=None):
         super(GoveeDevice, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
         self.lpfx = '%s:%s' % (address,name)
 
-        self.macAddress = macAddress
+        self.deviceId = deviceId
         self.ipAddress = ipAddress
         self.sku = sku
         self._send = send_fn

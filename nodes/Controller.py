@@ -1,7 +1,8 @@
 import udi_interface
 
 from .GoveeDevice import GoveeDevice
-from utilities import GoveeClient, GoveeListener
+from utilities import GoveeClient
+from utilities.timed_govee_listener import TimedGoveeListener
 
 LOGGER = udi_interface.LOGGER
 LOG_HANDLER = udi_interface.LOG_HANDLER
@@ -47,65 +48,90 @@ class Controller(udi_interface.Node):
 
         self.scanForDevices()
 
-    def scanForDevices(self, command=None):
-        """Discover Govee devices on the network"""
-        # Stop any existing listener
-        if self.listener:
-            try:
-                self.listener.stop()
-            except Exception:
-                pass
-            self.listener = None
 
-        # Start a listener to receive discovery responses
-        self.listener = GoveeListener()
-        self.listener.start(callback=self.processDiscoveredDevice)
-
-        # Send a multicast discovery packet via the reusable client
+    def queryDevices(self, command=None):
+        """Query Govee devices on the network (short poll)"""
+        timeout = 5
+        if self.listener and hasattr(self.listener, 'is_active') and self.listener.is_active:
+            self.listener.extend(timeout)
+        else:
+            self.listener = TimedGoveeListener(timeout=timeout, callback=self.processDevice)
+            self.listener.start()
         try:
             self.client.send_multicast({
                 "msg": {
-                    "cmd": "devStatus",
-                    "data": {}
+                    "cmd": "scan",
+                    "data": {"account_topic": "reserve"}
                 }
             }, multicast_group='239.255.255.250', port=4001, ttl=2)
         except Exception as e:
             LOGGER.debug(f"Failed to send discovery packet: {e}")
 
 
-    def processDiscoveredDevice(self, response, address):   
+    def scanForDevices(self, command=None):
+        """Discover Govee devices on the network (long poll)"""
+        timeout = 10
+        if self.listener and hasattr(self.listener, 'is_active') and self.listener.is_active:
+            self.listener.extend(timeout)
+        else:
+            self.listener = TimedGoveeListener(timeout=timeout, callback=self.processDevice)
+            self.listener.start()
+        try:
+            self.client.send_multicast({
+                "msg": {
+                    "cmd": "scan",
+                    "data": {"account_topic": "reserve"}
+                }
+            }, multicast_group='239.255.255.250', port=4001, ttl=2)
+        except Exception as e:
+            LOGGER.debug(f"Failed to send discovery packet: {e}")
+
+
+    def processDevice(self, response, address):   
         """Callback to handle discovered devices"""
         LOGGER.debug(f"Found device at {address[0]}: {response}")
         
         msg = response.get('msg', {})
+        cmd = msg.get('cmd', '')
         data = msg.get('data', {})
 
-        LOGGER.debug(f"Processing device data: {data}")
+        if(cmd == 'scan'):
+            device_id = data.get('device', 'unknown').replace(':', '').lower()
+            child_address = device_id[:14]
 
-        device_mac = data.get('device', 'unknown').replace(':', '').lower()
-        child_address = device_mac[:14]
+            if self.poly.getNode(child_address):
+                """Update device info if it already exists"""
+                node = self.poly.getNode(child_address)
+                node.ipAddress = data.get('ip', 'unknown')
+                node.sku = data.get('sku', 'unknown')
+                LOGGER.info(f"Updated existing device with address: {child_address}")
+                return
 
-        if self.poly.getNode(child_address):
-            """Update device info if it already exists"""
-            node = self.poly.getNode(child_address)
-            node.ipAddress = data.get('ip', 'unknown')
-            node.sku = data.get('sku', 'unknown')
-            LOGGER.info(f"Updated existing device with address: {child_address}")
-            return
+            LOGGER.info(f"Adding device with address: {child_address}, primary: {self.address}")
 
-        LOGGER.info(f"Adding device with address: {child_address}, primary: {self.address}")
+            device = GoveeDevice(
+                self.poly, 
+                self.address,  # primary (controller address)
+                child_address,  # valid child address (MAC without colons)
+                data.get('device', 'unknown'),  # name
+                data.get('device', 'unknown'),
+                data.get('ip', 'unknown'),
+                data.get('sku', 'unknown'),
+                send_fn=self.send_request_to_device,
+            )
+            self.poly.addNode(device)
+        elif(cmd == 'devStatus'):
+            nodes = self.poly.getNodes()
 
-        device = GoveeDevice(
-            self.poly, 
-            self.address,  # primary (controller address)
-            child_address,  # valid child address (MAC without colons)
-            data.get('device', 'unknown'),  # name
-            data.get('device', 'unknown'),
-            data.get('ip', 'unknown'),
-            data.get('sku', 'unknown'),
-            send_fn=self.send_request_to_device,
-        )
-        self.poly.addNode(device)
+            for address, node in nodes.items():
+                if hasattr(node, 'ipAddress') and node.ipAddress == address[0]:
+                    LOGGER.debug(f"Updating status for device at {address[0]}: {data}")
+                    node.setDriver('ST', data.get('onOff', 0))
+                    node.setDriver('GV0', data.get('brightness', 0))
+                    node.setDriver('GV1', data.get('colorTemInKelvin', 0))
+                    return
+        else:
+            LOGGER.debug(f"Unknown command in response: {cmd}")
 
 
     def parameterHandler(self, params):
@@ -133,9 +159,10 @@ class Controller(udi_interface.Node):
         if 'longPoll' in flag:
             LOGGER.debug('longPoll (controller)')
             self.heartbeat()
+            self.scanForDevices()
         else:
             LOGGER.debug('shortPoll (controller)')
-            self.scanForDevices()
+            self.queryDevices()
 
 
     # TODO: On query, request device updates
