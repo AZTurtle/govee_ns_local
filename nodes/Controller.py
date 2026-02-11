@@ -60,8 +60,8 @@ class Controller(udi_interface.Node):
         try:
             self.client.send_multicast({
                 "msg": {
-                    "cmd": "scan",
-                    "data": {"account_topic": "reserve"}
+                    "cmd": "devStatus",
+                    "data": {}
                 }
             }, multicast_group='239.255.255.250', port=4001, ttl=2)
         except Exception as e:
