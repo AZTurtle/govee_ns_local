@@ -55,7 +55,7 @@ class GoveeDevice(udi_interface.Node):
         """Set brightness level"""
         value = int(command.get('value'))
         LOGGER.info(f'SET_BRI to {value} for {self.address}')
-        payload = {"msg": {"cmd": "turn", "data": {"value": value}}}
+        payload = {"msg": {"cmd": "brightness", "data": {"value": value}}}
         if self._send and self.ipAddress:
             try:
                 self._send(self.ipAddress, payload, expect_response=False)
