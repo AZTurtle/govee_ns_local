@@ -1,7 +1,7 @@
 import udi_interface
 
 from .GoveeDevice import GoveeDevice
-from .GoveeDiscovery import GoveeDiscovery
+from utilities import GoveeClient, GoveeListener
 
 LOGGER = udi_interface.LOGGER
 LOG_HANDLER = udi_interface.LOG_HANDLER
@@ -20,6 +20,9 @@ class Controller(udi_interface.Node):
         self.Notices = Custom(polyglot, 'notices')
         self.TypedParameters = Custom(polyglot, 'customtypedparams')
         self.TypedData = Custom(polyglot, 'customtypeddata')
+
+        self.client = GoveeClient(reuse_socket=True)
+        self.listener = None
 
         self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
@@ -47,11 +50,28 @@ class Controller(udi_interface.Node):
 
     def scanForDevices(self, command=None):
         """Discover Govee devices on the network"""
-        if self.discovery:
-            self.discovery.stopDiscovery()
-            
-        self.discovery = GoveeDiscovery()
-        self.discovery.startDiscovery(callback=self.processDiscoveredDevice)
+        # Stop any existing listener
+        if self.listener:
+            try:
+                self.listener.stop()
+            except Exception:
+                pass
+            self.listener = None
+
+        # Start a listener to receive discovery responses
+        self.listener = GoveeListener()
+        self.listener.start(callback=self.processDiscoveredDevice)
+
+        # Send a multicast discovery packet via the reusable client
+        try:
+            self.client.send_multicast({
+                "msg": {
+                    "cmd": "scan",
+                    "data": {"account_topic": "reserve"}
+                }
+            }, multicast_group='239.255.255.250', port=4001, ttl=2)
+        except Exception as e:
+            LOGGER.debug(f"Failed to send discovery packet: {e}")
 
 
     def processDiscoveredDevice(self, response, address):   
@@ -80,6 +100,7 @@ class Controller(udi_interface.Node):
             data.get('device', 'unknown'),
             data.get('ip', 'unknown'),
             data.get('sku', 'unknown'),
+            send_fn=self.send_request_to_device,
         )
         self.poly.addNode(device)
 
@@ -122,15 +143,37 @@ class Controller(udi_interface.Node):
 
 
     def discover(self, *args, **kwargs):
-        self.poly.addNode(GoveeDevice(self.poly, self.address, 'templateaddr', 'Template Node Name'))
+        self.poly.addNode(GoveeDevice(self.poly, self.address, 'templateaddr', 'Template Node Name', '00:00:00:00:00:00', '127.0.0.1', 'template', send_fn=self.send_request_to_device))
 
 
     def delete(self):
         LOGGER.info('Oh God I\'m being deleted. Nooooooooooooooooooooooooooooooooooooooooo.')
+        try:
+            self.client.close()
+        except Exception:
+            pass
 
 
     def stop(self):
         LOGGER.debug('NodeServer stopped.')
+        try:
+            self.client.close()
+        except Exception:
+            pass
+        # Stop listener if running
+        if self.listener:
+            try:
+                self.listener.stop()
+            except Exception:
+                pass
+            self.listener = None
+
+    def send_request_to_device(self, ip, payload, port=None, expect_response=False):
+        try:
+            return self.client.send_request(ip, payload, port=port, expect_response=expect_response)
+        except Exception as e:
+            LOGGER.debug(f"Error sending request to {ip}: {e}")
+            return None
 
 
     def heartbeat(self,init=False):

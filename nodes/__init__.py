@@ -1,3 +1,3 @@
 from .Controller       import Controller
 from .GoveeDevice      import GoveeDevice
-from .GoveeDiscovery   import GoveeDiscovery
+from utilities.govee_discovery import GoveeDiscovery
