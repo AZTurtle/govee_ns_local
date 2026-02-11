@@ -188,19 +188,6 @@ class Controller(udi_interface.Node):
             self.reportCmd("DOF",2)
             self.hb = 0
 
-    """
-    Optional.
-    Since the controller is a node in ISY, it will actual show up as a node.
-    Thus it needs to know the drivers and what id it will use. The controller
-    should report the node server status and have any commands that are
-    needed to control operation of the node server.
-
-    Typically, node servers will use the 'ST' driver to report the node server
-    status and it a best pactice to do this unless you have a very good
-    reason not to.
-
-    The id must match the nodeDef id="controller" in the nodedefs.xml
-    """
     id = 'controller'
     commands = {
         'QUERY': query,
