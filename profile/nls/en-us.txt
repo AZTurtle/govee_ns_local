@@ -21,7 +21,6 @@ CMD-ctl-DISCOVER-NAME = Discover Devices
 # Commands - Device
 CMD-dev-DON-NAME = On
 CMD-dev-DOF-NAME = Off
-CMD-dev-QUERY-NAME = Query
 CMD-dev-SET_BRI-NAME = Set Brightness
 CMD-dev-SET_CLITEMP-NAME = Set Color Temperature
 

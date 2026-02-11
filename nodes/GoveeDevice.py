@@ -9,7 +9,6 @@ class GoveeDevice(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name, deviceId, ipAddress, sku, send_fn=None):
         super(GoveeDevice, self).__init__(polyglot, primary, address, name)
         self.poly = polyglot
-        self.lpfx = '%s:%s' % (address,name)
 
         self.deviceId = deviceId
         self.ipAddress = ipAddress
@@ -20,16 +19,7 @@ class GoveeDevice(udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.poll)
 
     def start(self):
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 1)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 0)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 1)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.setDriver('ST', 0)
-        LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
-        self.http = urllib3.PoolManager()
+        pass
 
     def poll(self, polltype):
         if 'longPoll' in polltype:
@@ -40,7 +30,6 @@ class GoveeDevice(udi_interface.Node):
                 self.setDriver('ST',0)
             else:
                 self.setDriver('ST',1)
-            LOGGER.debug('%s: get ST=%s',self.lpfx,self.getDriver('ST'))
 
     def setOn(self, command=None):
         """Turn device on"""
@@ -51,8 +40,6 @@ class GoveeDevice(udi_interface.Node):
                 self._send(self.ipAddress, payload, expect_response=False)
             except Exception as e:
                 LOGGER.debug(f"Failed to send ON to {self.ipAddress}: {e}")
-
-        self.setDriver('ST', 1)
         
     def setOff(self, command=None):
         """Turn device off"""
@@ -63,8 +50,6 @@ class GoveeDevice(udi_interface.Node):
                 self._send(self.ipAddress, payload, expect_response=False)
             except Exception as e:
                 LOGGER.debug(f"Failed to send OFF to {self.ipAddress}: {e}")
-
-        self.setDriver('ST', 0)
         
     def setBrightness(self, command):
         """Set brightness level"""
@@ -76,8 +61,6 @@ class GoveeDevice(udi_interface.Node):
                 self._send(self.ipAddress, payload, expect_response=False)
             except Exception as e:
                 LOGGER.debug(f"Failed to send brightness to {self.ipAddress}: {e}")
-
-        self.setDriver('GV0', value)
         
     def setColorTemp(self, command):
         """Set color temperature"""
@@ -89,14 +72,6 @@ class GoveeDevice(udi_interface.Node):
                 self._send(self.ipAddress, payload, expect_response=False)
             except Exception as e:
                 LOGGER.debug(f"Failed to send color temp to {self.ipAddress}: {e}")
-
-        self.setDriver('GV1', value)
-    
-    def query(self, command=None):
-        """Query device for current status"""
-        LOGGER.info(f'Query received for {self.address}')
-        # Poll device for current status here
-        self.reportDrivers()
     
     id = 'govee_device'
     
@@ -105,7 +80,6 @@ class GoveeDevice(udi_interface.Node):
         'DOF': setOff,
         'SET_BRI': setBrightness,
         'SET_CLITEMP': setColorTemp,
-        'QUERY': query,
     }
     
     drivers = [
