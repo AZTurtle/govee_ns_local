@@ -39,6 +39,21 @@ class GoveeClient:
         target_port = port or self.port
         message = json.dumps(payload).encode('utf-8')
 
+        if expect_response:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as tsock:
+                tsock.settimeout(self.timeout)
+                try:
+                    tsock.sendto(message, (ip, target_port))
+                except Exception as e:
+                    LOGGER.debug(f"Error sending (expect_response) to {ip}:{target_port}: {e}")
+                    raise
+                try:
+                    data, addr = tsock.recvfrom(4096)
+                    return json.loads(data.decode('utf-8'))
+                except socket.timeout:
+                    return None
+
+        # No response expected: use reusable socket if configured.
         if self.reuse:
             self._ensure_socket()
             with self._lock:
@@ -47,24 +62,13 @@ class GoveeClient:
                 except Exception as e:
                     LOGGER.debug(f"Error sending to {ip}:{target_port}: {e}")
                     raise
-
-                if expect_response:
-                    try:
-                        data, addr = self.sock.recvfrom(4096)
-                        return json.loads(data.decode('utf-8'))
-                    except socket.timeout:
-                        return None
+            return None
         else:
-            # Use a temporary socket for this request
+            # Use a temporary socket for this request (no response expected)
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as tsock:
                 tsock.settimeout(self.timeout)
                 tsock.sendto(message, (ip, target_port))
-                if expect_response:
-                    try:
-                        data, addr = tsock.recvfrom(4096)
-                        return json.loads(data.decode('utf-8'))
-                    except socket.timeout:
-                        return None
+            return None
 
     def close(self):
         if self.sock:

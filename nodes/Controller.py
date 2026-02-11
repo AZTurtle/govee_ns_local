@@ -47,7 +47,6 @@ class Controller(udi_interface.Node):
 
         self.scanForDevices()
 
-
     def scanForDevices(self, command=None):
         """Discover Govee devices on the network"""
         # Stop any existing listener
@@ -66,8 +65,8 @@ class Controller(udi_interface.Node):
         try:
             self.client.send_multicast({
                 "msg": {
-                    "cmd": "scan",
-                    "data": {"account_topic": "reserve"}
+                    "cmd": "devStatus",
+                    "data": {}
                 }
             }, multicast_group='239.255.255.250', port=4001, ttl=2)
         except Exception as e:
@@ -87,7 +86,11 @@ class Controller(udi_interface.Node):
         child_address = device_mac[:14]
 
         if self.poly.getNode(child_address):
-            LOGGER.info(f"Device {child_address} already exists, skipping")
+            """Update device info if it already exists"""
+            node = self.poly.getNode(child_address)
+            node.ipAddress = data.get('ip', 'unknown')
+            node.sku = data.get('sku', 'unknown')
+            LOGGER.info(f"Updated existing device with address: {child_address}")
             return
 
         LOGGER.info(f"Adding device with address: {child_address}, primary: {self.address}")
