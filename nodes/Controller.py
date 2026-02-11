@@ -123,14 +123,13 @@ class Controller(udi_interface.Node):
         elif(cmd == 'devStatus'):
             nodes = self.poly.getNodes()
 
-            for address, node in nodes.items():
+            for node_address, node in nodes.items():
                 if hasattr(node, 'ipAddress') and node.ipAddress == address[0]:
                     LOGGER.debug(f"Updating status for device at {address[0]}: {data}")
                     node.setDriver('ST', data.get('onOff', 0))
                     node.setDriver('GV0', data.get('brightness', 0))
                     node.setDriver('GV1', data.get('colorTemInKelvin', 0))
                     return
-                LOGGER.debug(f"Device at {address[0]} does not match node {address} with IP {getattr(node, 'ipAddress', 'N/A')}")
         else:
             LOGGER.debug(f"Unknown command in response: {cmd}")
 
